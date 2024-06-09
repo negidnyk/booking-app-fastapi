@@ -8,7 +8,7 @@ from src.auth.models import User
 from config import AUTH_SECRET
 
 # cookie_transport = CookieTransport(cookie_name="bonds", cookie_max_age=3600)
-bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
+bearer_transport = BearerTransport(tokenUrl="auth/login")
 
 
 def get_jwt_strategy() -> JWTStrategy:
