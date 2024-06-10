@@ -20,7 +20,7 @@ class Role(Base):
 class User(SQLAlchemyBaseUserTable[int], Base):
     __tablename__ = "user"
     __table_args__ = {'extend_existing': True}
-    id = Column(Integer, primary_key=True, index=True, nullable=False, unique=True)
+    id = Column(Integer, primary_key=True, index=True, nullable=False, unique=False)
     email = Column(String, nullable=False)
     username = Column(String, nullable=False)
     bio = Column(String(200), nullable=True)

@@ -86,14 +86,14 @@ async def get_user_profile(user_id, session, user):
         raise HTTPException(status_code=404, detail="User not found")
 
     else:
-        query = select(User).where(User.id == user_id)
-        user_profile = await session.execute(query)
-        result_list = user_profile.scalars().one()
+        # query = select(User).where(User.id == user_id)
+        # user_profile = await session.execute(query)
+        # result_list = user_profile.scalars().one()
 
-        return UserGetsUser(id=result_list.id,
-                            email=result_list.email,
-                            username=result_list.username,
-                            bio=result_list.bio
+        return UserGetsUser(id=profile.id,
+                            email=profile.email,
+                            username=profile.username,
+                            bio=profile.bio
                             )
                             # avatar=await get_avatar(user.id, session))
 
