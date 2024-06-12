@@ -107,4 +107,4 @@ async def delete_my_profile(session, user):
     deleted_profile = await session.execute(query)
     result = deleted_profile.scalars().one()
 
-    return {f"Profile with id: {User.id} is successfully deleted"}
+    return {f"Profile with id: {user.id} is successfully deleted"}
