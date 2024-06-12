@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from src.auth.base_config import auth_backend, fastapi_users
 from src.auth.schemas import UserRead, UserCreate
 from src.users.user.router import router as users_router
+from src.users.masters.router import router as masters_router
+from src.services.router import router as services_router
 
 app = FastAPI(
     title="Booking App"
@@ -27,3 +29,5 @@ app.include_router(
 current_user = fastapi_users.current_user()
 
 app.include_router(users_router)
+app.include_router(masters_router)
+app.include_router(services_router)

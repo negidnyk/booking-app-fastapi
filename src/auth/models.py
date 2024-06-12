@@ -27,7 +27,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     # avatar_id = Column(Integer, ForeignKey("files.id"), nullable=True)
     registered_at = Column(TIMESTAMP, default=datetime.utcnow)
     role_id = Column(Integer, ForeignKey("role.id"))
-    services = Column(String, nullable=True)
+    # services = Column(String, nullable=True)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_superuser = Column(Boolean, default=False, nullable=False)
