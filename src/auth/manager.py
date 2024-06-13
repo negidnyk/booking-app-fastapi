@@ -37,18 +37,18 @@ VERIFY_USER_TOKEN_AUDIENCE = "fastapi-users:verify"
 
 
 
-async def validate_password(password: str, user: Union[schemas.UC, models.UP]) -> None:
-    if len(password) < 8:
-        raise HTTPException(status_code=400, detail="Password should contain at least 8 characters")
-
-    if len(password) > 30:
-        raise HTTPException(status_code=400, detail="Password should not contain more than 30 characters")
-
-    if re.search(r'\d', password) and re.search(r'[a-zA-Z]', password):
-        raise HTTPException(status_code=400, detail="Password should contain latinic characters only")
-    else:
-        raise HTTPException(status_code=400, detail="Password should contain at least 1 letter and 1 digit")
-    return  # pragma: no cover
+# async def validate_password(password: str, user: Union[schemas.UC, models.UP]) -> None:
+#     if len(password) < 8:
+#         raise HTTPException(status_code=400, detail="Password should contain at least 8 characters")
+#
+#     if len(password) > 30:
+#         raise HTTPException(status_code=400, detail="Password should not contain more than 30 characters")
+#
+#     if re.search(r'\d', password) and re.search(r'[a-zA-Z]', password):
+#         raise HTTPException(status_code=400, detail="Password should contain latinic characters only")
+#     else:
+#         raise HTTPException(status_code=400, detail="Password should contain at least 1 letter and 1 digit")
+#     return  # pragma: no cover
 
 
 
@@ -69,7 +69,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         safe: bool = False,
         request: Optional[Request] = None,
     ) -> models.UP:
-        await validate_password(user_create.password, user_create)
+        await self.validate_password(user_create.password, user_create)
 
 
 
