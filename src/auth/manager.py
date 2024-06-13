@@ -1,6 +1,6 @@
 from fastapi import Depends, Request
-from fastapi_users import BaseUserManager, IntegerIDMixin, exceptions, models, schemas
-
+from fastapi_users import BaseUserManager, UUIDIDMixin
+import uuid
 from src.auth.models import User
 from src.auth.utils import get_user_db
 
@@ -34,7 +34,7 @@ async def validate_password(password: str, user: Union[schemas.UC, models.UP]) -
         return  # pragma: no cover
 
 
-class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
+class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = RESET_PASS_SECRET
     verification_token_secret = RESET_PASS_SECRET
 

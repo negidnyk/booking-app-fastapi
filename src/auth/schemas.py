@@ -1,13 +1,13 @@
 from typing import Optional
-
+import uuid
 from fastapi_users import schemas
 from pydantic import BaseModel, Field
 from src.files.schemas import MediaOut
 from src.services.schemas import ServiceTypes
 
 
-class UserRead(schemas.BaseUser[int]):
-    id: int
+class UserRead(schemas.BaseUser[uuid.UUID]):
+    id: uuid.UUID
     email: str
     username: str
     bio: str = None
@@ -21,7 +21,7 @@ class UserRead(schemas.BaseUser[int]):
 
 
 class UserGetsUser(BaseModel):
-    id: int
+    id: uuid.UUID
     email: str
     username: str
     bio: str = None

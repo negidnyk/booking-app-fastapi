@@ -16,11 +16,7 @@ async def get_my_profile(session, user):
     my_profile = await session.execute(query)
     result_list = my_profile.scalars().one()
 
-    return UserGetsUser(id=result_list.id,
-                        email=result_list.email,
-                        username=result_list.username,
-                        bio=result_list.bio
-                        )
+    return UserGetsUser(**result_list)
 
 
 async def update_my_profile(profile, session, user):
