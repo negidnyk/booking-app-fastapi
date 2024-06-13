@@ -23,7 +23,8 @@ async def validate_password(password: str, user: Union[schemas.UC, models.UP]) -
     if len(password) > 30:
         raise HTTPException(status_code=400, detail="Password should not contain more than 30 characters")
 
-    if re.search(r'\d', password) and re.search(r'[a-zA-Z]', password):
+    if re.search(r'\d', password) and not re.search(r'[a-zA-Z]', password) or re.search(r'[a-zA-Z]', password) and not \
+            re.search(r'\d', password):
         raise HTTPException(status_code=400, detail="Password should contain at least 1 letter and 1 digit")
 
     if re.search(r'[а-яА-я]', password):
