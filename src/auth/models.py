@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable, SQLAlchemyBaseUserTableUUID
+from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable, SQLAlchemyBaseUserTableUUID, SQLAlchemyBaseOAuthAccountTable
 from fastapi_users_db_sqlalchemy.access_token import SQLAlchemyAccessTokenDatabase, SQLAlchemyBaseAccessTokenTableUUID
 from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean, MetaData
 from sqlalchemy.orm import relationship
@@ -18,43 +18,47 @@ class Role(Base):
     permissions = Column(Integer, nullable=False)
 
 
-class User(SQLAlchemyBaseUserTableUUID, Base):
+class User(SQLAlchemyBaseUserTable[int], Base):
+    __tablename__ = "user"
     __table_args__ = {'extend_existing': True}
+    id = Column(Integer, primary_key=True, index=True, nullable=False, unique=True)
+    email = Column(String, nullable=False)
     username = Column(String, nullable=False)
     bio = Column(String(200), nullable=True)
+    # avatar_id = Column(Integer, ForeignKey("files.id"), nullable=True)
+    registered_at = Column(TIMESTAMP, default=datetime.utcnow)
     role_id = Column(Integer, ForeignKey("role.id"))
+    hashed_password = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    is_superuser = Column(Boolean, default=False, nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)
+    is_deleted = Column(Boolean, default=False, nullable=False)
 
 
-
-class AccessToken(SQLAlchemyBaseAccessTokenTableUUID, Base):
-    pass
-
-
-# class AccessToken(SQLAlchemyAccessTokenDatabase, Base):
-#     pass
-#     # __tablename__ = "access_token"
-#     # id = Column(Integer, primary_key=True, index=True, nullable=False, unique=True)
-#     # token = Column(String, nullable=False)
-#     # user_id = Column(Integer, ForeignKey("user.id"))
-#     # created_at = Column(TIMESTAMP, default=datetime.utcnow)
-
+class OauthUser(SQLAlchemyBaseOAuthAccountTable, Base):
+    __tablename__ = "oauth_user"
+    __allow_unmapped__ = True
+    id = Column(Integer, primary_key=True, index=True, nullable=False, unique=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("user.id"))
 
 
 
 
 
-# class User(SQLAlchemyBaseUserTable[int], Base):
-#     __tablename__ = "user"
+
+################DATABASE STRATEGY##############################
+# class User(SQLAlchemyBaseUserTableUUID, Base):
 #     __table_args__ = {'extend_existing': True}
-#     id = Column(Integer, primary_key=True, index=True, nullable=False, unique=False)
-#     email = Column(String, nullable=False)
 #     username = Column(String, nullable=False)
 #     bio = Column(String(200), nullable=True)
-#     # avatar_id = Column(Integer, ForeignKey("files.id"), nullable=True)
-#     registered_at = Column(TIMESTAMP, default=datetime.utcnow)
 #     role_id = Column(Integer, ForeignKey("role.id"))
-#     # services = Column(String, nullable=True)
-#     hashed_password = Column(String, nullable=False)
-#     is_active = Column(Boolean, default=True, nullable=False)
-#     is_superuser = Column(Boolean, default=False, nullable=False)
-#     is_verified = Column(Boolean, default=False, nullable=False)
+#
+#
+#
+# class AccessToken(SQLAlchemyBaseAccessTokenTableUUID, Base):
+#     pass
+
+################DATABASE STRATEGY##############################
+
+
+

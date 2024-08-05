@@ -7,12 +7,10 @@ from alembic import context
 
 import sys
 
-
-
 from config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
 # from src.files.models import File
-from src.auth.models import User, Role, AccessToken
-from src.services.models import Service, ServiceGroup
+from src.auth.models import User
+# from src.services.models import Service, ServiceGroup
 from db.base import Base
 
 # sys.path.append(os.path.join(sys.path[0], 'src'))

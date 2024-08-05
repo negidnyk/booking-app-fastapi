@@ -1,115 +1,160 @@
 from fastapi import HTTPException
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, insert
 from src.auth.models import User
 from src.auth.schemas import UserGetsUser
 # from src.users.user.helpers import get_avatar
 # from src.files.helpers import validate_media, file_exist
 from src.files.models import File
-from src.users.user.validations import is_user
+from src.users.user.validations import is_user, is_deleted
+from database import async_engine
 
 
-async def get_my_profile(session, user):
+class UserCrud:
+    @staticmethod
+    async def get_my_profile(session, user):
+        is_user(user.role_id)
+        is_deleted(user)
 
-    is_user(user.role_id)
+        try:
+            query = select(User).where(User.id == user.id)
+            user_profile = await session.execute(query)
+            profile = user_profile.scalar_one_or_none()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Something went wrong in get_me api service. Details:\n{e}")
+        finally:
+            return UserGetsUser(id=profile.id,
+                                email=profile.email,
+                                username=profile.username,
+                                bio=profile.bio
+                                )
 
-    query = select(User).where(User.id == user.id)
-    my_profile = await session.execute(query)
-    result_list = my_profile.scalars().one()
+    @staticmethod
+    async def change_profile(profile, session, user):
 
-    return UserGetsUser(id=result_list.id,
-                        email=result_list.email,
-                        username=result_list.username,
-                        bio=result_list.bio
-                        )
+        is_user(user.role_id)
+        is_deleted(user)
 
+        payload = {}
 
-async def update_my_profile(profile, session, user):
+        if profile.username is not None:
+            payload["username"] = profile.username
 
-    is_user(user.role_id)
+        if profile.bio is not None:
+            payload["bio"] = profile.bio
 
-    payload = {}
+        try:
+            stmt = update(User).where(User.id == user.id).values(**payload)
+            await session.execute(stmt)
+            await session.commit()
 
-    if profile.username is not None:
-        payload["username"] = profile.username
+            query = select(User).where(User.id == user.id)
+            my_profile = await session.execute(query)
+            result_list = my_profile.scalars().one()
 
-    if profile.bio is not None:
-        payload["bio"] = profile.bio
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Something went wrong in change profile api service. "
+                                                        f"Details:\n{e}")
+        finally:
+            return UserGetsUser(id=result_list.id,
+                                email=result_list.email,
+                                username=result_list.username,
+                                bio=result_list.bio
+                                )
+                                # avatar=await get_avatar(user.id, session))
 
-    stmt = update(User).where(User.id == user.id).values(**payload)
-    await session.execute(stmt)
-    await session.commit()
+    @staticmethod
+    async def create_google_user_profile(email, name, session):
+        payload = {}
+        payload['email'] = email
+        payload['hashed_password'] = ""
+        payload['is_active'] = True
+        payload['is_superuser'] = False
+        payload['is_verified'] = True
+        payload['username'] = name
+        payload['role_id'] = 3
+        payload['is_deleted'] = False
+        print("HELLO GOOGLE")
+        stmt = insert(User).values(email=email,
+                                   hashed_password="",
+                                   is_active=True,
+                                   is_superuser=False,
+                                   is_verified=True,
+                                   username=name,
+                                   role_id=3,
+                                   is_deleted=False)
+        print(stmt)
+        await session.execute(stmt)
+        await session.commit()
+        print("HELLO GOOGLE2")
+        # print(payload)
 
-    query = select(User).where(User.id == user.id)
-    my_profile = await session.execute(query)
-    result_list = my_profile.scalars().one()
+    @staticmethod
+    async def complete_registration(profile, session, user):
 
-    return UserGetsUser(id=result_list.id,
-                        email=result_list.email,
-                        username=result_list.username,
-                        bio=result_list.bio
-                        )
-                        # avatar=await get_avatar(user.id, session))
+        is_user(user.role_id)
+        is_deleted(user)
 
+        payload = {}
 
-async def complete_masters_profile(profile, session, user):
+        if profile.username is not None:
+            payload["username"] = profile.username
 
-    is_user(user.role_id)
+        if profile.bio is not None:
+            payload["bio"] = profile.bio
 
-    payload = {}
+        try:
+            stmt = update(User).where(User.id == user.id).values(**payload)
+            await session.execute(stmt)
+            await session.commit()
 
-    if profile.username is not None:
-        payload["username"] = profile.username
+            query = select(User).where(User.id == user.id)
+            my_profile = await session.execute(query)
+            result_list = my_profile.scalars().one()
 
-    if profile.bio is not None:
-        payload["bio"] = profile.bio
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Something went wrong in complete_registration api service. "
+                                                        f"Details:\n{e}")
+        finally:
+            return UserGetsUser(id=result_list.id,
+                                email=result_list.email,
+                                username=result_list.username,
+                                bio=result_list.bio
+                                )
+                                # avatar=await get_avatar(user.id, session))
 
-    stmt = update(User).where(User.id == user.id).values(**payload)
-    await session.execute(stmt)
-    await session.commit()
+    @staticmethod
+    async def get_single_user(session, user_id, user):
 
-    query = select(User).where(User.id == user.id)
-    my_profile = await session.execute(query)
-    result_list = my_profile.scalars().one()
+        is_user(user.role_id)
+        is_deleted(user)
 
-    return UserGetsUser(id=result_list.id,
-                        email=result_list.email,
-                        username=result_list.username,
-                        bio=result_list.bio
-                        )
-                        # avatar=await get_avatar(user.id, session))
+        query = select(User).where(User.id == user_id)
+        user_profile = await session.execute(query)
+        profile = user_profile.scalar_one_or_none()
 
+        if profile is None or profile.role_id == 1 or profile.role_id == 2:
+            raise HTTPException(status_code=404, detail="User not found")
 
-async def complete_users_profile(profile, session, user):
-
-    return update_my_profile(profile, session, user)
-
-
-async def get_user_profile(user_id, session, user):
-
-    is_user(user.role_id)
-
-    query = select(User).where(User.id == user_id)
-    user_profile = await session.execute(query)
-    profile = user_profile.scalar_one_or_none()
-
-    if profile is None or profile.role_id == 1 or profile.role_id == 2:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    else:
         return UserGetsUser(id=profile.id,
                             email=profile.email,
                             username=profile.username,
                             bio=profile.bio
                             )
-                            # avatar=await get_avatar(user.id, session))
+        # avatar=await get_avatar(user.id, session))
 
+    @staticmethod
+    async def remove_profile(session, user):
 
-async def delete_my_profile(session, user):
+        is_user(user.role_id)
+        is_deleted(user)
+        payload = {"is_deleted": True}
 
-    is_user(user.role_id)
-
-    query = delete(User).where(User.id == user.id)
-    deleted_profile = await session.execute(query)
-    result = deleted_profile.scalars().one()
-
-    return {f"Profile with id: {User.id} is successfully deleted"}
+        try:
+            stmt = update(User).where(User.id == user.id).values(**payload)
+            await session.execute(stmt)
+            await session.commit()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Something went wrong in remove_profile api service. "
+                                                        f"Details:\n{e}")
+        finally:
+            return {f"User: {user.username} is successfully deleted!"}
