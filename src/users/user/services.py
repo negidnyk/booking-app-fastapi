@@ -5,6 +5,8 @@ from src.auth.schemas import UserGetsUser
 # from src.users.user.helpers import get_avatar
 # from src.files.helpers import validate_media, file_exist
 from src.files.models import File
+from src.files.helpers import validate_media, file_exist
+from src.files.services import get_avatar
 from src.users.user.validations import is_user, is_deleted
 from database import async_engine
 
@@ -25,14 +27,26 @@ class UserCrud:
             return UserGetsUser(id=profile.id,
                                 email=profile.email,
                                 username=profile.username,
-                                bio=profile.bio
-                                )
+                                bio=profile.bio,
+                                avatar=await get_avatar(user.id, session))
 
     @staticmethod
     async def change_profile(profile, session, user):
 
         is_user(user.role_id)
         is_deleted(user)
+
+        if profile.avatar_id:
+
+            is_file_exist = await file_exist(profile.avatar_id, session)
+
+            if is_file_exist:
+                raise HTTPException(status_code=404, detail="File not found!")
+
+            media_validation = await validate_media(profile.avatar_id, session)
+
+            if media_validation:
+                raise HTTPException(status_code=400, detail="File is already used!")
 
         payload = {}
 
@@ -42,9 +56,16 @@ class UserCrud:
         if profile.bio is not None:
             payload["bio"] = profile.bio
 
+        if profile.avatar_id is not None:
+            payload["avatar_id"] = profile.avatar_id
+
         try:
             stmt = update(User).where(User.id == user.id).values(**payload)
             await session.execute(stmt)
+            await session.commit()
+
+            stmt2 = update(File).where(File.id == profile.avatar_id).values(is_used=True)
+            await session.execute(stmt2)
             await session.commit()
 
             query = select(User).where(User.id == user.id)
@@ -58,9 +79,8 @@ class UserCrud:
             return UserGetsUser(id=result_list.id,
                                 email=result_list.email,
                                 username=result_list.username,
-                                bio=result_list.bio
-                                )
-                                # avatar=await get_avatar(user.id, session))
+                                bio=result_list.bio,
+                                avatar=await get_avatar(user.id, session))
 
     @staticmethod
     async def create_google_user_profile(email, name, session):
@@ -118,9 +138,9 @@ class UserCrud:
             return UserGetsUser(id=result_list.id,
                                 email=result_list.email,
                                 username=result_list.username,
-                                bio=result_list.bio
-                                )
-                                # avatar=await get_avatar(user.id, session))
+                                bio=result_list.bio,
+                                avatar=await get_avatar(user.id, session))
+
 
     @staticmethod
     async def get_single_user(session, user_id, user):
@@ -138,9 +158,8 @@ class UserCrud:
         return UserGetsUser(id=profile.id,
                             email=profile.email,
                             username=profile.username,
-                            bio=profile.bio
-                            )
-        # avatar=await get_avatar(user.id, session))
+                            bio=profile.bio,
+                            avatar=await get_avatar(user.id, session))
 
     @staticmethod
     async def remove_profile(session, user):
@@ -158,3 +177,7 @@ class UserCrud:
                                                         f"Details:\n{e}")
         finally:
             return {f"User: {user.username} is successfully deleted!"}
+
+
+
+

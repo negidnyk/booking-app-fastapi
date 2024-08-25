@@ -25,7 +25,7 @@ class UserGetsUser(BaseModel):
     email: str
     username: str
     bio: str = None
-    # avatar: MediaOut = None
+    avatar: MediaOut = None
 
     class Config:
         orm_mode = True
