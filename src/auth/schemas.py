@@ -17,7 +17,7 @@ class UserRead(schemas.BaseUser[int]):
     is_deleted: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserGetsUser(BaseModel):
@@ -28,7 +28,7 @@ class UserGetsUser(BaseModel):
     avatar: MediaOut = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class AdminGetsUser(UserRead):
@@ -46,7 +46,7 @@ class UserCreate(schemas.BaseUserCreate):
     is_deleted: bool = Field(default=False)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserUpdate(BaseModel):
