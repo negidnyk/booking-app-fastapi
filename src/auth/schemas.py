@@ -9,7 +9,6 @@ class UserRead(schemas.BaseUser[int]):
     id: int
     email: str
     username: str
-    bio: str = None
     role_id: int
     is_active: bool = True
     is_superuser: bool = False
@@ -17,7 +16,7 @@ class UserRead(schemas.BaseUser[int]):
     is_deleted: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserGetsUser(BaseModel):
@@ -28,10 +27,10 @@ class UserGetsUser(BaseModel):
     avatar: MediaOut = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
-class AdminGetsUser(UserRead):
+class AdminGetsUser(UserGetsUser):
     avatar: MediaOut = None
 
 
@@ -39,6 +38,7 @@ class UserCreate(schemas.BaseUserCreate):
     username: str
     email: str
     password: str
+    bio: str = None
     role_id: int = Field(description="1 - Admin, 2 - User, 3 - Superadmin")
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
@@ -46,10 +46,10 @@ class UserCreate(schemas.BaseUserCreate):
     is_deleted: bool = Field(default=False)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(schemas.BaseUserUpdate):
     username: str = None
     bio: str = None
     avatar_id: int = None
