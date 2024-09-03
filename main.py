@@ -2,6 +2,7 @@ from src.auth.base_config import auth_backend, fastapi_users
 from src.auth.schemas import UserRead, UserCreate
 from src.users.user.router import router as users_router
 from src.files.router import router as files_router
+from src.appointments.router import router as appointments_router
 from authlib.integrations.starlette_client import OAuth
 from authlib.integrations.starlette_client import OAuthError
 from fastapi import FastAPI
@@ -56,6 +57,7 @@ current_user = fastapi_users.current_user()
 
 app.include_router(users_router)
 app.include_router(files_router)
+app.include_router(appointments_router)
 
 
 @app.get('/')

@@ -49,10 +49,16 @@ class UserCreate(schemas.BaseUserCreate):
         from_attributes = True
 
 
-class UserUpdate(schemas.BaseUserUpdate):
+class UserUpdate(BaseModel):
     username: str = None
     bio: str = None
     avatar_id: int = None
+
+
+# class UserUpdate(schemas.BaseUserUpdate):
+#     username: str = None
+#     bio: str = None
+#     avatar_id: int = None
 
 
 class OauthUserCreate(schemas.BaseOAuthAccount):
