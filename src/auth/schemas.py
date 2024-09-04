@@ -1,5 +1,4 @@
-from typing import Optional
-
+from typing import Any, List, Optional
 from fastapi_users import schemas
 from pydantic import BaseModel, Field
 from src.files.schemas import MediaOut
@@ -23,8 +22,8 @@ class UserGetsUser(BaseModel):
     id: int
     email: str
     username: str
-    bio: str = None
-    avatar: MediaOut = None
+    bio: Optional[str] = None
+    avatar: Optional[MediaOut] = None
 
     class Config:
         from_attributes = True
@@ -38,7 +37,7 @@ class UserCreate(schemas.BaseUserCreate):
     username: str
     email: str
     password: str
-    bio: str = None
+    bio: Optional[str] = None
     role_id: int = Field(description="1 - Admin, 2 - User, 3 - Superadmin")
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
@@ -50,9 +49,9 @@ class UserCreate(schemas.BaseUserCreate):
 
 
 class UserUpdate(BaseModel):
-    username: str = None
-    bio: str = None
-    avatar_id: int = None
+    username: Optional[str] = None
+    bio: Optional[str] = None
+    avatar_id: Optional[int] = None
 
 
 # class UserUpdate(schemas.BaseUserUpdate):

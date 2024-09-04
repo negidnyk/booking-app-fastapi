@@ -31,7 +31,7 @@ async def get_me(session: AsyncSession = Depends(get_async_session), user: User 
 @router.patch("/complete_my_profile/", status_code=201)
 async def complete_profile(profile: UserUpdate, session: AsyncSession = Depends(get_async_session),
                            user: User = Depends(current_active_user)):
-    return await UserCrud.complete_registration(profile, session, user)
+    return await UserCrud.change_profile(profile, session, user)
 
 
 @router.patch("/update_me/", status_code=201)

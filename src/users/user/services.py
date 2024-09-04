@@ -5,7 +5,7 @@ from src.auth.schemas import UserGetsUser
 # from src.users.user.helpers import get_avatar
 # from src.files.helpers import validate_media, file_exist
 from src.files.models import File
-from src.files.helpers import validate_media, file_exist
+from src.files.helpers import validate_media, file_exist, checked_media
 from src.files.services import get_avatar
 from src.users.user.validations import is_user, is_deleted
 from database import async_engine
@@ -32,23 +32,15 @@ class UserCrud:
 
     @staticmethod
     async def change_profile(profile, session, user):
-
+        payload = {}
         is_user(user.role_id)
         is_deleted(user)
-
-        if profile.avatar_id:
-
-            is_file_exist = await file_exist(profile.avatar_id, session)
-
-            if is_file_exist:
-                raise HTTPException(status_code=404, detail="File not found!")
-
-            media_validation = await validate_media(profile.avatar_id, session)
-
-            if media_validation:
-                raise HTTPException(status_code=400, detail="File is already used!")
-
-        payload = {}
+        if profile.avatar_id is not None:
+            media_validation = await checked_media(profile.avatar_id, session)
+            if not media_validation:
+                raise HTTPException(status_code=400, detail="Something wrong with avatar")
+            else:
+                payload["avatar_id"] = profile.avatar_id
 
         if profile.username is not None:
             payload["username"] = profile.username
@@ -56,21 +48,26 @@ class UserCrud:
         if profile.bio is not None:
             payload["bio"] = profile.bio
 
-        if profile.avatar_id is not None:
-            payload["avatar_id"] = profile.avatar_id
-
         try:
             stmt = update(User).where(User.id == user.id).values(**payload)
             await session.execute(stmt)
             await session.commit()
 
-            stmt2 = update(File).where(File.id == profile.avatar_id).values(is_used=True)
+            stmt2 = update(File).where(File.user_id == user.id).values(is_used=False)
             await session.execute(stmt2)
+            await session.commit()
+
+            stmt3 = update(File).where(File.id == profile.avatar_id).values(is_used=True)
+            await session.execute(stmt3)
             await session.commit()
 
             query = select(User).where(User.id == user.id)
             my_profile = await session.execute(query)
             result_list = my_profile.scalars().one()
+
+            stmt4 = delete(File).filter(File.user_id == user.id, File.is_used == False)
+            await session.execute(stmt4)
+            await session.commit()
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Something went wrong in change profile api service. "
@@ -108,38 +105,38 @@ class UserCrud:
         print("HELLO GOOGLE2")
         # print(payload)
 
-    @staticmethod
-    async def complete_registration(profile, session, user):
-
-        is_user(user.role_id)
-        is_deleted(user)
-
-        payload = {}
-
-        if profile.username is not None:
-            payload["username"] = profile.username
-
-        if profile.bio is not None:
-            payload["bio"] = profile.bio
-
-        try:
-            stmt = update(User).where(User.id == user.id).values(**payload)
-            await session.execute(stmt)
-            await session.commit()
-
-            query = select(User).where(User.id == user.id)
-            my_profile = await session.execute(query)
-            result_list = my_profile.scalars().one()
-
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Something went wrong in complete_registration api service. "
-                                                        f"Details:\n{e}")
-        finally:
-            return UserGetsUser(id=result_list.id,
-                                email=result_list.email,
-                                username=result_list.username,
-                                bio=result_list.bio,
-                                avatar=await get_avatar(user.id, session))
+    # @staticmethod
+    # async def complete_registration(profile, session, user):
+    #
+    #     is_user(user.role_id)
+    #     is_deleted(user)
+    #
+    #     payload = {}
+    #
+    #     if profile.username is not None:
+    #         payload["username"] = profile.username
+    #
+    #     if profile.bio is not None:
+    #         payload["bio"] = profile.bio
+    #
+    #     try:
+    #         stmt = update(User).where(User.id == user.id).values(**payload)
+    #         await session.execute(stmt)
+    #         await session.commit()
+    #
+    #         query = select(User).where(User.id == user.id)
+    #         my_profile = await session.execute(query)
+    #         result_list = my_profile.scalars().one()
+    #
+    #     except Exception as e:
+    #         raise HTTPException(status_code=500, detail=f"Something went wrong in complete_registration api service. "
+    #                                                     f"Details:\n{e}")
+    #     finally:
+    #         return UserGetsUser(id=result_list.id,
+    #                             email=result_list.email,
+    #                             username=result_list.username,
+    #                             bio=result_list.bio,
+    #                             avatar=await get_avatar(user.id, session))
 
 
     @staticmethod

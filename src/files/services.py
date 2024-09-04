@@ -66,15 +66,5 @@ async def get_avatar(user_id, session):
         return MediaOut(id=response.id, file=url)
 
 
-# async def get_media(post_id, session):
-#     query = select(File).join(Post).where(Post.id == post_id)
-#     post_media = await session.execute(query)
-#     response = post_media.scalars().first()
-#
-#     url = s3_client.generate_presigned_url('get_object', Params={'Bucket': S3_BUCKET_NAME,
-#                                                                  'Key': file_name},
-#                                            ExpiresIn=3600)
-#
-#     return MediaOut(id=response.id, file=url)
 
 

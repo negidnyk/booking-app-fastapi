@@ -6,10 +6,10 @@ from src.appointments.schemas import GetCreatedAppointment
 
 class AppointmentsCrud:
     @staticmethod
-    async def create_appointment(appointment_details, session):
+    async def create_appointment(appointment_details, session, user):
         payload = {}
         payload["master_id"] = appointment_details.master_id
-        payload["user_id"] = appointment_details.user_id
+        payload["user_id"] = user.id
         payload["description"] = appointment_details.description
         payload["service_id"] = appointment_details.service_id
         payload["price"] = appointment_details.price

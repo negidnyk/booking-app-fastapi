@@ -18,5 +18,6 @@ current_active_user = fastapi_users.current_user(active=True)
 
 
 @router.post("/", status_code=201)
-async def create_appointment(appointment: CreateAppointment, session: AsyncSession = Depends(get_async_session)):
-    return await AppointmentsCrud.create_appointment(appointment, session)
+async def create_appointment(appointment: CreateAppointment, session: AsyncSession = Depends(get_async_session),
+                             user: User = Depends(current_active_user)):
+    return await AppointmentsCrud.create_appointment(appointment, session, user)
