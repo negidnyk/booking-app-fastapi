@@ -10,7 +10,6 @@ class CreateAppointment(BaseModel):
     price: float
     booked_at: datetime
     booked_to: datetime
-    created_at: datetime
     is_approved_by_master: bool = False
     is_visited_by_user: bool = False
 

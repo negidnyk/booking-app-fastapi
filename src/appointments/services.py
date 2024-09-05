@@ -15,7 +15,6 @@ class AppointmentsCrud:
         payload["price"] = appointment_details.price
         payload["booked_at"] = appointment_details.booked_at
         payload["booked_to"] = appointment_details.booked_to
-        payload["created_at"] = appointment_details.created_at
         payload["is_approved_by_master"] = appointment_details.is_approved_by_master
         payload["is_visited_by_user"] = appointment_details.is_visited_by_user
 
@@ -23,9 +22,11 @@ class AppointmentsCrud:
             stmt = insert(Appointment).values(**payload)
             await session.execute(stmt)
             await session.commit()
-            query = select(Appointment).where(Appointment.created_at == appointment_details.created_at)
-            appointment_details = await session.execute(query)
-            result = appointment_details.scalars().first()
+
+            query = select(Appointment).limit(1).order_by(Appointment.created_at.desc())
+            created_appointment = await session.execute(query)
+            result = created_appointment.scalar_one_or_none()
+
             return GetCreatedAppointment(id=result.id,
                                          master_id=result.master_id,
                                          user_id=result.user_id,
@@ -38,4 +39,5 @@ class AppointmentsCrud:
                                          is_approved_by_master=result.is_approved_by_master,
                                          is_visited_by_user=result.is_visited_by_user)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Something went wrong in create appointment api service. Details:\n{e}")
+            raise HTTPException(status_code=500,
+                                detail=f"Something went wrong in create appointment api service. Details:\n{e}")

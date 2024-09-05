@@ -15,7 +15,7 @@ class Appointment(Base):
     master_id = Column(Integer, ForeignKey("user.id", ondelete='CASCADE'))
     user_id = Column(Integer, ForeignKey("user.id", ondelete='CASCADE'))
     description = Column(String(200), nullable=True)
-    service_id = Column(Integer, nullable=False)
+    service_id = Column(Integer, ForeignKey("beauty_service.id", ondelete='CASCADE'))
     price = Column(Double, nullable=False)
     booked_at = Column(TIMESTAMP, nullable=False)
     booked_to = Column(TIMESTAMP, nullable=False)

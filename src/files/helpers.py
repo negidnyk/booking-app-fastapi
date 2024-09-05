@@ -12,6 +12,8 @@ async def checked_media(file_id, session):
     query = select(File).where(File.id == file_id)
     file = await session.execute(query)
     response = file.scalars().first()
+    if not response:
+        raise HTTPException(status_code=404, detail="There is no file with such id")
     if response.is_used:
         raise HTTPException(status_code=400, detail="File is already used")
     else:

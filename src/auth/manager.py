@@ -37,6 +37,7 @@ async def validate_password(password: str, user: Union[schemas.UC, models.UP]) -
 
 
 async def validate_username(username: str):
+
     if len(username) < 2:
         raise HTTPException(status_code=400, detail="Username should contain at least 2 characters")
 
@@ -45,6 +46,9 @@ async def validate_username(username: str):
 
     if re.search(r'[а-яА-я]', username):
         raise HTTPException(status_code=400, detail="Username should contain latinic characters only")
+
+    if re.search(r'^\d+(\.\d+)?$', username):
+        raise HTTPException(status_code=400, detail="Username should not contain numbers only")
 
     else:
         return  # pragma: no cover

@@ -3,7 +3,7 @@ from typing import Annotated, Union
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_async_session
 from src.auth.base_config import fastapi_users
-# from src.users.user.services import (get_my_profile,
+# from src.users.user.beauty_services import (get_my_profile,
 #                                      complete_registration,
 #                                      change_profile,
 #                                      get_single_user,

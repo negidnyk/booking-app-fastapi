@@ -13,6 +13,7 @@ router = APIRouter(
 
 current_active_user = fastapi_users.current_user(active=True)
 
+
 @router.post("/image")
 async def upload_image(file: UploadFile, session: AsyncSession = Depends(get_async_session),
                        user: User = Depends(current_active_user)):
