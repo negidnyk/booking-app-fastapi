@@ -4,10 +4,7 @@ from datetime import date, datetime, time, timedelta
 
 
 class CreateAppointment(BaseModel):
-    master_id: int
-    description: str
-    service_id: int
-    price: float
+    master_proposal_id: int
     booked_at: datetime
     booked_to: datetime
     is_approved_by_master: bool = False
@@ -19,11 +16,7 @@ class CreateAppointment(BaseModel):
 
 class GetCreatedAppointment(BaseModel):
     id: int
-    master_id: int
-    user_id: int
-    description: str
-    service_id: int
-    price: float
+    master_proposal_id: int
     booked_at: datetime
     booked_to: datetime
     created_at: datetime

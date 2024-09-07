@@ -32,52 +32,96 @@ class UserCrud:
 
     @staticmethod
     async def change_profile(profile, session, user):
-        payload = {}
+
         is_user(user.role_id)
         is_deleted(user)
-        if profile.avatar_id is not None:
-            media_validation = await checked_media(profile.avatar_id, session)
-            if not media_validation:
-                raise HTTPException(status_code=400, detail="Something wrong with avatar")
+
+        if not profile.avatar_id and not profile.username and not profile.bio:
+            try:
+                query = select(User).where(User.id == user.id)
+                my_profile = await session.execute(query)
+                result_list = my_profile.scalars().one()
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Something went wrong in change profile api service. "
+                                                            f"Details:\n{e}")
+            finally:
+                return UserGetsUser(id=result_list.id,
+                                    email=result_list.email,
+                                    username=result_list.username,
+                                    bio=result_list.bio,
+                                    avatar=await get_avatar(user.id, session))
+        else:
+            payload = {}
+            if profile.avatar_id:
+                media_validation = await checked_media(profile.avatar_id, session)
+                if not media_validation:
+                    raise HTTPException(status_code=400, detail="Something wrong with avatar")
+                else:
+                    payload["avatar_id"] = profile.avatar_id
+
+                if profile.username:
+                    payload["username"] = profile.username
+
+                if profile.bio:
+                    payload["bio"] = profile.bio
+
+                try:
+                    stmt = update(User).where(User.id == user.id).values(**payload)
+                    await session.execute(stmt)
+                    await session.commit()
+
+                    stmt2 = update(File).where(File.user_id == user.id).values(is_used=False)
+                    await session.execute(stmt2)
+                    await session.commit()
+
+                    stmt3 = update(File).where(File.id == profile.avatar_id).values(is_used=True)
+                    await session.execute(stmt3)
+                    await session.commit()
+
+                    query = select(User).where(User.id == user.id)
+                    my_profile = await session.execute(query)
+                    result_list = my_profile.scalars().one()
+
+                    stmt4 = delete(File).filter(File.user_id == user.id, File.is_used == False)
+                    await session.execute(stmt4)
+                    await session.commit()
+
+                except Exception as e:
+                    raise HTTPException(status_code=500, detail=f"Something went wrong in change profile api service. "
+                                                                f"Details:\n{e}")
+                finally:
+                    return UserGetsUser(id=result_list.id,
+                                        email=result_list.email,
+                                        username=result_list.username,
+                                        bio=result_list.bio,
+                                        avatar=await get_avatar(user.id, session))
+
             else:
-                payload["avatar_id"] = profile.avatar_id
+                if profile.username:
+                    payload["username"] = profile.username
 
-        if profile.username is not None:
-            payload["username"] = profile.username
+                if profile.bio:
+                    payload["bio"] = profile.bio
 
-        if profile.bio is not None:
-            payload["bio"] = profile.bio
+                try:
+                    stmt = update(User).where(User.id == user.id).values(**payload)
+                    await session.execute(stmt)
+                    await session.commit()
 
-        try:
-            stmt = update(User).where(User.id == user.id).values(**payload)
-            await session.execute(stmt)
-            await session.commit()
+                    query = select(User).where(User.id == user.id)
+                    my_profile = await session.execute(query)
+                    result_list = my_profile.scalars().one()
 
-            stmt2 = update(File).where(File.user_id == user.id).values(is_used=False)
-            await session.execute(stmt2)
-            await session.commit()
+                except Exception as e:
+                    raise HTTPException(status_code=500, detail=f"Something went wrong in change profile api service. "
+                                                                f"Details:\n{e}")
+                finally:
+                    return UserGetsUser(id=result_list.id,
+                                        email=result_list.email,
+                                        username=result_list.username,
+                                        bio=result_list.bio,
+                                        avatar=await get_avatar(user.id, session))
 
-            stmt3 = update(File).where(File.id == profile.avatar_id).values(is_used=True)
-            await session.execute(stmt3)
-            await session.commit()
-
-            query = select(User).where(User.id == user.id)
-            my_profile = await session.execute(query)
-            result_list = my_profile.scalars().one()
-
-            stmt4 = delete(File).filter(File.user_id == user.id, File.is_used == False)
-            await session.execute(stmt4)
-            await session.commit()
-
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Something went wrong in change profile api service. "
-                                                        f"Details:\n{e}")
-        finally:
-            return UserGetsUser(id=result_list.id,
-                                email=result_list.email,
-                                username=result_list.username,
-                                bio=result_list.bio,
-                                avatar=await get_avatar(user.id, session))
 
     @staticmethod
     async def create_google_user_profile(email, name, session):

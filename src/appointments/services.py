@@ -8,11 +8,7 @@ class AppointmentsCrud:
     @staticmethod
     async def create_appointment(appointment_details, session, user):
         payload = {}
-        payload["master_id"] = appointment_details.master_id
-        payload["user_id"] = user.id
-        payload["description"] = appointment_details.description
-        payload["service_id"] = appointment_details.service_id
-        payload["price"] = appointment_details.price
+        payload["master_proposal_id"] = appointment_details.master_proposal_id
         payload["booked_at"] = appointment_details.booked_at
         payload["booked_to"] = appointment_details.booked_to
         payload["is_approved_by_master"] = appointment_details.is_approved_by_master
@@ -28,11 +24,7 @@ class AppointmentsCrud:
             result = created_appointment.scalar_one_or_none()
 
             return GetCreatedAppointment(id=result.id,
-                                         master_id=result.master_id,
-                                         user_id=result.user_id,
-                                         description=result.description,
-                                         service_id=result.service_id,
-                                         price=result.price,
+                                         master_proposal_id=result.master_proposal_id,
                                          booked_at=result.booked_at,
                                          booked_to=result.booked_to,
                                          created_at=result.created_at,
