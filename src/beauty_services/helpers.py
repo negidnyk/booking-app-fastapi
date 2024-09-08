@@ -27,3 +27,4 @@ async def get_service_by_id(service_id, session):
                                    name=result.name,
                                    added_by=result.added_by,
                                    created_at=result.created_at)
+

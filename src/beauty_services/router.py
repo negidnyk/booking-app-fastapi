@@ -30,7 +30,7 @@ async def get_beauty_services(skip: int = 0, limit: int = 10, session: AsyncSess
     return await BeautyServiceCrud.get_all_beauty_services(skip, limit, session, user)
 
 
-@router.get("/service_group{group_id}", status_code=200)
+@router.get("/service_group/{group_id}", status_code=200)
 async def get_services_by_group(group_id: int, skip: int = 0, limit: int = 10,
                                 session: AsyncSession = Depends(get_async_session),
                                 user: User = Depends(current_active_user)):

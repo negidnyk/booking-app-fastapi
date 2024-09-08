@@ -2,11 +2,15 @@ from fastapi import HTTPException
 from sqlalchemy import select, update, delete, insert
 from src.appointments.models import Appointment
 from src.appointments.schemas import GetCreatedAppointment
+from src.users.user.validations import is_user, is_master
 
 
 class AppointmentsCrud:
     @staticmethod
     async def create_appointment(appointment_details, session, user):
+
+        await is_user(user.id)
+
         payload = {}
         payload["master_proposal_id"] = appointment_details.master_proposal_id
         payload["booked_at"] = appointment_details.booked_at
