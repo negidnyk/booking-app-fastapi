@@ -5,6 +5,7 @@ from src.files.router import router as files_router
 from src.appointments.router import router as appointments_router
 from src.beauty_services.router import router as beauty_service_router
 from src.master_proposals.router import router as master_proposals_router
+from src.auth2.auth_test import router as test_auth_router
 from authlib.integrations.starlette_client import OAuth
 from authlib.integrations.starlette_client import OAuthError
 from fastapi import FastAPI
@@ -19,7 +20,6 @@ from database import get_async_session
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.schemas import UserCreate
-from src.auth.models import OauthUser
 from src.auth.manager import UserManager
 from src.auth.utils import get_user_db
 from src.users.user.services import UserCrud
@@ -28,6 +28,7 @@ from src.users.user.services import UserCrud
 app = FastAPI(
     title="Booking App"
 )
+
 
 # Set up OAuth
 config_data = {'GOOGLE_CLIENT_ID': GOOGLE_CLIENT_ID, 'GOOGLE_CLIENT_SECRET': GOOGLE_CLIENT_SECRET}
@@ -62,6 +63,7 @@ app.include_router(files_router)
 app.include_router(appointments_router)
 app.include_router(beauty_service_router)
 app.include_router(master_proposals_router)
+app.include_router(test_auth_router)
 
 
 @app.get('/')

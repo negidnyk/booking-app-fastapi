@@ -1,10 +1,7 @@
 from datetime import datetime
-
-from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable, SQLAlchemyBaseUserTableUUID, SQLAlchemyBaseOAuthAccountTable
-from fastapi_users_db_sqlalchemy.access_token import SQLAlchemyAccessTokenDatabase, SQLAlchemyBaseAccessTokenTableUUID
+from typing import AsyncGenerator, List
+from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy import Table, Column, Integer, String, TIMESTAMP, ForeignKey, JSON, Boolean, MetaData
-from sqlalchemy.orm import relationship
-
 from database import Base
 
 # metadata = MetaData()
@@ -16,6 +13,14 @@ class Role(Base):
     id = Column(Integer, primary_key=True, index=True, nullable=False, unique=True)
     name = Column(String, nullable=False)
     permissions = Column(Integer, nullable=False)
+
+
+# class OauthAccount(SQLAlchemyBaseOAuthAccountTable[int], Base):
+#     __table_args__ = {'extend_existing': True}
+#     # __tablename__ = "oauth_user"
+#     # __allow_unmapped__ = True
+#     # id = Column(Integer, primary_key=True, index=True, nullable=False, unique=True, autoincrement=True)
+#     # user_id = Column(Integer, ForeignKey("user.id"))
 
 
 class User(SQLAlchemyBaseUserTable[int], Base):
@@ -33,32 +38,6 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     is_superuser = Column(Boolean, default=False, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
     is_deleted = Column(Boolean, default=False, nullable=False)
-
-
-class OauthUser(SQLAlchemyBaseOAuthAccountTable, Base):
-    __tablename__ = "oauth_user"
-    __allow_unmapped__ = True
-    id = Column(Integer, primary_key=True, index=True, nullable=False, unique=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("user.id"))
-
-
-
-
-
-
-################DATABASE STRATEGY##############################
-# class User(SQLAlchemyBaseUserTableUUID, Base):
-#     __table_args__ = {'extend_existing': True}
-#     username = Column(String, nullable=False)
-#     bio = Column(String(200), nullable=True)
-#     role_id = Column(Integer, ForeignKey("role.id"))
-#
-#
-#
-# class AccessToken(SQLAlchemyBaseAccessTokenTableUUID, Base):
-#     pass
-
-################DATABASE STRATEGY##############################
 
 
 
