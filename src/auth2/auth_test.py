@@ -14,6 +14,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_async_session
 
 
+
+#saske = "spasiiiiii"
+
 class Token(BaseModel):
     access_token: str
     token_type: str
